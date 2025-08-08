@@ -9,4 +9,4 @@ import { CategoriaService } from './categoria.service';
   controllers: [CategoriaController],
   providers: [CategoriaService]
 })
-export class UsuarioModule {}
+export class CategoriaModule {}

@@ -10,12 +10,16 @@ export class UsuarioService {
 
     constructor(@InjectRepository(Usuario) private usuarioRepository : Repository<Usuario>) {}
 
+    async modificarFechaActualizacionUsuario(id: number) {
+        const hora = new Date(); 
+        return this.usuarioRepository.update({ id },{ updatedAt: hora });}
+    
     async crearUsuario(usuario : CrearUsuarioDto){
         const usuarioEncontrado = await this.usuarioRepository.findOne({
-            where:{nombre: usuario.nombre}
+            where:{email: usuario.email}
         })
         if (usuarioEncontrado){
-            return new HttpException('ERROR. El nombre de usuario ya está ocupado.',
+            return new HttpException('ERROR. Email ya ocupado.',
                 HttpStatus.CONFLICT)
         }
         const nuevoUsuario = this.usuarioRepository.create(usuario)
@@ -41,6 +45,7 @@ export class UsuarioService {
     }
 
     async actualizarUsuario(id:number, usuario: ActualizarUsuarioDto) {
-        return this.usuarioRepository.update({id}, usuario)
+        await this.usuarioRepository.update({id}, usuario);
+        return this.modificarFechaActualizacionUsuario(id)
     }
 }

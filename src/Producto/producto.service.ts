@@ -1,46 +1,75 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Categoria } from './categoria.entity';
-import { CrearCategoriaDto } from './dto/crear-categoria.dto';
-import { ActualizarCategoriaDto } from './dto/actualizar-categoria.dto';
+import { Producto } from './producto.entity';
+import { CrearProductoDto } from './dto/crear-producto.dto';
+import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
 
 @Injectable()
-export class CategoriaService {
+export class ProductoService {
 
-    constructor(@InjectRepository(Categoria) private categoriaRepository : Repository<Categoria>) {}
+    constructor(@InjectRepository(Producto) private productoRepository : Repository<Producto>) {}
 
-    async crearCategoria(categoria : CrearCategoriaDto){
-        const categoriaEncontrada = await this.categoriaRepository.findOne({
-            where:{nombre: categoria.nombre}
+    async modificarFechaActualizacion(id: number) {
+        const hora = new Date(); 
+        return this.productoRepository.update({ id },{ updatedAt: hora });}
+
+    async crearProducto(producto : CrearProductoDto){
+        const productoEncontrado = await this.productoRepository.findOne({
+            where:{nombre: producto.nombre}
         })
-        if (categoriaEncontrada){
-            return new HttpException('ERROR. El nombre de la categoría ya está ocupado.',
+        if (productoEncontrado){
+            return new HttpException('ERROR. El nombre del producto ya está ocupado.',
                 HttpStatus.CONFLICT)
         }
-        const nuevaCategoria = this.categoriaRepository.create(categoria)
-        return this.categoriaRepository.save(nuevaCategoria)
+        const nuevoProducto = this.productoRepository.create(producto)
+        return this.productoRepository.save(nuevoProducto)
     }
 
-    async obtenerCategorias(){
-        return this.categoriaRepository.find()
+    async obtenerProductos(){
+        return this.productoRepository.find()
     }
 
-    async obtenerCategoria(id: number){
-        const categoriaEncontrada = await this.categoriaRepository.findOne({
+    async obtenerProducto(id: number){
+        const productoEncontrado = await this.productoRepository.findOne({
             where:{id,}
         });
-        if(!categoriaEncontrada) {
-            return new HttpException('ERROR. Categoria no encontrada', HttpStatus.NOT_FOUND);
+        if(!productoEncontrado) {
+            return new HttpException('ERROR. Producto no encontrado.', HttpStatus.NOT_FOUND);
         }
-        return categoriaEncontrada
+        return productoEncontrado
     }
 
-    async borrarCategoria(id : number){
-        return this.categoriaRepository.delete({id});
+    async buscarPorCategoria(id: number){
+        return this.productoRepository.find({where:{categoria_id : id} })
     }
 
-    async actualizarCategoria(id:number, categoria: ActualizarCategoriaDto) {
-        return this.categoriaRepository.update({id}, categoria)
+    async buscarPorNombre(nombreBuscar: string){
+        const productoEncontrado = await this.productoRepository.findOne({
+            where:{nombre : nombreBuscar}
+        });
+        if(!productoEncontrado) {
+            return new HttpException('ERROR. Producto no encontrado.', HttpStatus.NOT_FOUND);
+        }
+        return productoEncontrado
+    }
+
+    async borrarProducto(id : number){
+        return this.productoRepository.delete({id});
+    }
+
+    async actualizarProducto(id:number, producto: ActualizarProductoDto) {
+        await this.productoRepository.update({id}, producto)
+        return this.modificarFechaActualizacion(id);
+    }
+
+    async agregarStock(id:number, cantidad: number){
+        await this.productoRepository.increment({id}, 'stock', cantidad);
+        return this.modificarFechaActualizacion(id);
+    }
+
+    async quitarStock(id:number, cantidad: number){
+        await this.productoRepository.decrement({id}, 'stock', cantidad);
+        return this.modificarFechaActualizacion(id);
     }
 }

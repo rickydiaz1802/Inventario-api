@@ -10,6 +10,10 @@ export class CategoriaService {
 
     constructor(@InjectRepository(Categoria) private categoriaRepository : Repository<Categoria>) {}
 
+    async modificarFechaActualizacionCategoria(id: number) {
+        const hora = new Date(); 
+        return this.categoriaRepository.update({ id },{ updatedAt: hora });}
+
     async crearCategoria(categoria : CrearCategoriaDto){
         const categoriaEncontrada = await this.categoriaRepository.findOne({
             where:{nombre: categoria.nombre}
@@ -41,6 +45,7 @@ export class CategoriaService {
     }
 
     async actualizarCategoria(id:number, categoria: ActualizarCategoriaDto) {
-        return this.categoriaRepository.update({id}, categoria)
+        await this.categoriaRepository.update({id}, categoria);
+        return this.modificarFechaActualizacionCategoria(id);
     }
 }

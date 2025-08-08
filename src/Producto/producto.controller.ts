@@ -1,38 +1,63 @@
-import { Controller, Post, Get, Param, Body, ParseIntPipe, Delete, Patch} from '@nestjs/common';
-import { CategoriaService } from './categoria.service';
-import { Categoria } from './categoria.entity';
-import { CrearCategoriaDto } from './dto/crear-categoria.dto';
-import { ActualizarCategoriaDto } from './dto/actualizar-categoria.dto';
+import { Controller, Post, Get, Param, Body, ParseIntPipe, Delete, Patch, UseGuards} from '@nestjs/common';
+import { ProductoService } from './producto.service';
+import { Producto } from './producto.entity';
+import { CrearProductoDto } from './dto/crear-producto.dto';
+import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
-
-@Controller('categorias')
-export class CategoriaController {
-    constructor(private categoriaService: CategoriaService) {}
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@Controller('productos')
+export class ProductoController {
+    constructor(private productoService: ProductoService) {}
 
     @Get()
-    obtenerCategorias(): Promise <Categoria[]>{
-        return this.categoriaService.obtenerCategorias();
+    obtenerProductos(): Promise <Producto[]>{
+        return this.productoService.obtenerProductos();
     }
 
     @Get(':id')
-    obtenerCategoria(@Param('id', ParseIntPipe) id: number)
+    obtenerProducto(@Param('id', ParseIntPipe) id: number)
      {
-        return this.categoriaService.obtenerCategoria(id);
+        return this.productoService.obtenerProducto(id);
+    }
+
+    @Get('categoria/:id')
+    obtenerProductosPorCategoria(@Param('id') cat : number)
+     {
+        return this.productoService.buscarPorCategoria(cat);
+    }
+
+    @Get('buscar/:nombre')
+    obtenerProductoPorNombre(@Param('nombre') nombre : string)
+     {
+        return this.productoService.buscarPorNombre(nombre);
     }
 
     @Post()
-    crearCategoria(@Body() nuevaCategoria: CrearCategoriaDto) {
-        return this.categoriaService.crearCategoria(nuevaCategoria);
+    crearProducto(@Body() nuevoProducto: CrearProductoDto) {
+        return this.productoService.crearProducto(nuevoProducto);
     }
 
     @Delete(':id')
-    borrarCategoria(@Param('id', ParseIntPipe) id: number){
-        this.categoriaService.borrarCategoria(id)
+    borrarProducto(@Param('id', ParseIntPipe) id: number){
+        this.productoService.borrarProducto(id)
     }
 
     @Patch(':id')
-    actualizarCategoria(@Param('id', ParseIntPipe) id:number, @Body()
-    categoria : ActualizarCategoriaDto) {
-        this.categoriaService.actualizarCategoria(id, categoria)
+    actualizarProducto(@Param('id', ParseIntPipe) id:number, @Body()
+    producto : ActualizarProductoDto) {
+        this.productoService.actualizarProducto(id, producto)
     }
+
+    @Patch(':id/incrementar')
+    agregarStock(@Param('id', ParseIntPipe) id: number, @Body('cantidad') cantidad : number ) {
+            this.productoService.agregarStock(id, cantidad);
+        }
+
+    @Patch(':id/reducir')
+    quitarStock(@Param('id', ParseIntPipe) id: number, @Body('cantidad') cantidad : number ) {
+            this.productoService.quitarStock(id, cantidad);
+        }
 }

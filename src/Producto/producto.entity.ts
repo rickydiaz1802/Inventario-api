@@ -1,8 +1,8 @@
-import { Usuario } from "src/Usuario/usuario.entity"
-import { Entity, PrimaryGeneratedColumn , Column, ManyToOne} from "typeorm"
+import { Categoria } from "src/Categoria/categoria.entity"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne} from "typeorm"
 
-@Entity({name : 'categorias'})
-export class Categoria {
+@Entity({name : 'productos'})
+export class Producto {
 
     @PrimaryGeneratedColumn()
     id: number
@@ -30,6 +30,5 @@ export class Categoria {
 
     @Column({type: 'datetime', default : () => 'CURRENT_TIMESTAMP'})
     updatedAt : Date
-
     
 }

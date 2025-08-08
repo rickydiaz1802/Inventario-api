@@ -21,5 +21,8 @@ export class Usuario {
     @Column({type: 'datetime', default : () => 'CURRENT_TIMESTAMP'})
     updatedAt : Date
 
+    @Column()
+    tipo: string
+
     
 }
